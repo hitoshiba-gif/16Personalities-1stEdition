@@ -180,6 +180,98 @@ const CODE_META = {
 };
 const ALL_CODES = Object.keys(CODE_META);
 
+
+/* 16タイプの動物絵文字 */
+const EMOJIS_16 = [
+  '🐨','🐺','🦋','🐹','🕊','🐻','🦄','🦅',
+  '🦊','🦌','🐆','🦈','🐅','🦚','🐬','🦉'
+];
+
+(function makeEmojiCloud() {
+  const host = document.querySelector('.emoji-cloud');
+  if (!host) return;
+
+  const N = 18; // 粒の数（少し多めが可愛い）
+  const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  const isMobile = vw < 480;
+
+  for (let i = 0; i < N; i++) {
+    const span = document.createElement('span');
+    span.className = 'emo';
+    span.textContent = EMOJIS_16[i % EMOJIS_16.length];
+
+    const size   = isMobile ? rand(18, 28)  : rand(22, 34);
+    const x      = rand(6, 94);      // 横位置 %
+    const yStart = rand(102, 120);   // 画面下から
+    const dur    = rand(10, 16);     // 浮遊時間
+    const delay  = rand(-8, 6);      // ずらし
+    const drift  = rand(14, 28);     // 左右ゆらぎ
+    const rot    = rand(6, 14) * (Math.random() < .5 ? -1 : 1);
+    const travel = isMobile ? rand(48, 60) : rand(55, 70); // 上昇距離（vh）
+    const opacity= rand(55, 80) / 100;
+
+    span.style.setProperty('--size', size);
+    span.style.setProperty('--x', x);
+    span.style.setProperty('--yStart', yStart);
+    span.style.setProperty('--dur', dur + 's');
+    span.style.setProperty('--delay', delay + 's');
+    span.style.setProperty('--drift', drift + 'px');
+    span.style.setProperty('--rot', rot + 'deg');
+    span.style.setProperty('--heightTravel', travel + 'vh');
+    span.style.setProperty('--opacity', opacity);
+
+    host.appendChild(span);
+  }
+
+  function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+})();
+</script>
+<script>
+  (function(){
+    const ribbon = document.getElementById('emojiRibbon');
+    const track  = document.getElementById('ribbonTrack');
+    if(!ribbon || !track) return;
+
+    const durSec = Number(ribbon.dataset.speed || 28);
+    track.style.setProperty('--dur', durSec + 's');
+
+    const base = track.querySelector('.loop');
+    if(!base) return;
+
+    const needWidth = () => ribbon.clientWidth * 2.2;
+    while (track.scrollWidth < needWidth()) {
+      track.appendChild(base.cloneNode(true));
+    }
+    track.appendChild(base.cloneNode(true));
+
+    const half = track.scrollWidth / 2;
+    const gap  = Math.max(0, half - ribbon.clientWidth);
+    const ratio = half ? (gap / half) : 0;
+    const delaySec = -(ratio * durSec);
+    track.style.setProperty('--delay', delaySec + 's');
+
+    requestAnimationFrame(()=> track.classList.add('is-ready'));
+
+    let t;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(t);
+      t = setTimeout(()=>{
+        track.innerHTML = '';
+        track.appendChild(base.cloneNode(true));
+        (function rebuild(){
+          while (track.scrollWidth < needWidth()) track.appendChild(base.cloneNode(true));
+          track.appendChild(base.cloneNode(true));
+          const half = track.scrollWidth / 2;
+          const gap  = Math.max(0, half - ribbon.clientWidth);
+          const ratio = half ? (gap / half) : 0;
+          const delaySec = -(ratio * durSec);
+          track.style.setProperty('--delay', delaySec + 's');
+          track.classList.add('is-ready');
+        })();
+      }, 120);
+    }, { passive:true });
+  })();
+
 /* ==== メイン描画 ==== */
 async function fetchStats(){
   const url = GAS_URL + '?stats=1';
@@ -281,52 +373,6 @@ window.addEventListener('DOMContentLoaded', function(){
   scrim.addEventListener('click', close,    { passive: true });
   window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
 });
-</script>
-<script>
-/* 16タイプの動物絵文字 */
-const EMOJIS_16 = [
-  '🐨','🐺','🦋','🐹','🕊','🐻','🦄','🦅',
-  '🦊','🦌','🐆','🦈','🐅','🦚','🐬','🦉'
-];
-
-(function makeEmojiCloud() {
-  const host = document.querySelector('.emoji-cloud');
-  if (!host) return;
-
-  const N = 18; // 粒の数（少し多めが可愛い）
-  const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  const isMobile = vw < 480;
-
-  for (let i = 0; i < N; i++) {
-    const span = document.createElement('span');
-    span.className = 'emo';
-    span.textContent = EMOJIS_16[i % EMOJIS_16.length];
-
-    const size   = isMobile ? rand(18, 28)  : rand(22, 34);
-    const x      = rand(6, 94);      // 横位置 %
-    const yStart = rand(102, 120);   // 画面下から
-    const dur    = rand(10, 16);     // 浮遊時間
-    const delay  = rand(-8, 6);      // ずらし
-    const drift  = rand(14, 28);     // 左右ゆらぎ
-    const rot    = rand(6, 14) * (Math.random() < .5 ? -1 : 1);
-    const travel = isMobile ? rand(48, 60) : rand(55, 70); // 上昇距離（vh）
-    const opacity= rand(55, 80) / 100;
-
-    span.style.setProperty('--size', size);
-    span.style.setProperty('--x', x);
-    span.style.setProperty('--yStart', yStart);
-    span.style.setProperty('--dur', dur + 's');
-    span.style.setProperty('--delay', delay + 's');
-    span.style.setProperty('--drift', drift + 'px');
-    span.style.setProperty('--rot', rot + 'deg');
-    span.style.setProperty('--heightTravel', travel + 'vh');
-    span.style.setProperty('--opacity', opacity);
-
-    host.appendChild(span);
-  }
-
-  function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
-})();
 </script>
 <script>
 (function(){
