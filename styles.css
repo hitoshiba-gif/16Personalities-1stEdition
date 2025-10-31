@@ -2733,3 +2733,33 @@ body { padding-bottom: env(safe-area-inset-bottom); }
 .axis-section {
   display: none !important;
 }
+
+/* 無限スクロールの絵文字リボン（カード端から端まで） */
+    .emoji-ribbon.full{
+      margin-top: 18px;
+      width: 100%;
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent 0, black 6%, black 94%, transparent 100%);
+    }
+    .emoji-ribbon .ribbon-track{
+      display: inline-block;
+      white-space: nowrap;
+      transform: translateX(0);
+    }
+    .emoji-ribbon .ribbon-track .loop{
+      display:inline-block;
+      padding: 0;               /* ← 粒群間の余白を完全になくす */
+      margin: 0;
+      letter-spacing: 0;        /* ← 粒群間の“隙間”解消 */
+      word-spacing: 0;
+      font-size: 20px;
+      line-height: 1;
+      opacity: .9;
+    }
+    .emoji-ribbon .ribbon-track.is-ready{
+      animation: ribbonSlide var(--dur,28s) linear var(--delay,0s) infinite;
+    }
+    @keyframes ribbonSlide{
+      from{ transform: translateX(0); }
+      to  { transform: translateX(-50%); } /* 2枚分で半分進む */
+    }
